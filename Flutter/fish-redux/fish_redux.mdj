@@ -386,7 +386,7 @@
 										"$ref": "AAAAAAFsA8BfiD99bVo="
 									},
 									"edgePosition": 1,
-									"text": "+page enhance"
+									"text": "+pages enhance"
 								},
 								{
 									"_type": "EdgeLabelView",
@@ -13396,7 +13396,7 @@
 							"_parent": {
 								"$ref": "AAAAAAFsA6qf4TwQLFA="
 							},
-							"name": "page enhance",
+							"name": "pages enhance",
 							"source": {
 								"$ref": "AAAAAAFsA6qf4TwQLFA="
 							},
