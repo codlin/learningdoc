@@ -1,4 +1,4 @@
-### GraphQL学习笔记
+# GraphQL学习笔记
 
 [TOC]
 
@@ -107,5 +107,130 @@ type Person {
 
 我们刚刚在`Person`和`Post`之间创建了一个一对多关系，因为在posts字段是一个`Person`数组。
 
-### 用查询获取数据
+### 用Queries获取数据
+
+前面提到过，当使用REST API时，数据是从具体的endpoints加载的。每个endpoint都有明确定义的返回信息结构。这意味这客户端的数据请求有效的编码在其连接的URL中。
+
+GraphGL则不同，它只暴露一个单一的endpoint，因为它返回的数据结构不固定，所以只需要一个endpoint即可工作。并且它相当的灵活，让客户端来决定返回哪些数据。
+
+因此客户端需要发送更多的信息告诉服务端需要哪些数据，这些信息称之为查询query。
+
+#### 基本查询
+
+下面是一个基本查询的例子：
+
+![image-20191217200751965](./image-20191217200751965.png)
+
+服务端数据为：
+
+![image-20191217201237452](./image-20191217201237452.png)
+
+查询中`allPerson`字段称之为查询的根字段，多有根字段里面的字段称之为查询的载荷（payload）。例子中的查询的载荷只有一个字段`name`。
+
+查询返回了所有人的名字列表，注意返回的列表中国只有`name`字段，而没有`age`字段，这是因为查询中只指定了需要`name`字段。如果客户端需要`age`字段，所有需要做的稍微调整一些查询把`age`字段放到查询的载荷中：
+
+![image-20191217202844125](./image-20191217202844125.png)
+
+#### 带参数查询
+
+![image-20191217203038925](./image-20191217203038925.png)
+
+查询返回最后的两个名字。
+
+### 用Mutations写数据
+
+对数据的改变称之为Mutation，通常的mutation有增、删、改三种。
+
+![image-20191217205415090](./image-20191217205415090.png)
+
+### 通过Subscription实时更新
+
+当今应用程序的一个重要要求是与服务器建立实时连接，以便立即了解重要事件。对此，GraphGL提供了订阅的概念。
+
+当客户端订阅一个事件，它将启动并保持与服务器的稳定连接。每当实际的事件发生时，服务器就会推送对应的数据到客户端。与遵循典型的“`请求`-`响应`-`周期`”的Queries和Mutations不同，Subscriptions表示发送到客户端的数据流。
+
+订阅使用和Queries、Mutations类似的语法。
+
+```typescript
+subscription {
+  newPerson {
+    name
+    age
+  }
+}
+```
+
+在客户端向server发起订阅后，它们之间会打开一个连接。当一个新的创建`Person`的mutation执行后，服务器将会发送关于这个人的信息给客户端：
+
+```
+{
+  "newPerson": {
+    "name": "Jane",
+    "age": 23
+  }
+}
+```
+
+### 定义一个Schema
+
+有了queries、mutations和subscriptions，我们还需要编写一个schema来把这些元素整合起来。schema是GraphQL的重要概念，它指定API的功能，并定义客户端如何请求数据，通常被看作是客户端和服务端之间的合约。
+
+通常，一个schema是GraphGL类型的集合。但是，在为API编写架构时，有一些特殊的跟类型：
+
+```
+type Query { ... }
+type Mutation { ... }
+type Subscription { ... }
+```
+
+上面这三个类型时客户端发起请求的入口（entry points）。为了启用我们之前看到的allPersons查询，Query类型需写成下面的样子：
+
+```
+type Query {
+  allPersons(last: Int): [Person!]!
+}
+```
+
+同样的，`createPerson` mutation，我们需要将跟字段加入到Mutilation类型中：
+
+```
+type Mutation {
+  createPerson(name: String!, age: Int!): Person!
+}
+```
+
+最后，对于订阅，我们也需要添加根字段`newPerson`：
+
+```
+type Subscription {
+  newPerson: Person!
+}
+```
+
+最后，我们把它们合在一块，这构成了完整的schema：
+
+```
+type Query {
+  allPersons(last: Int): [Person!]!
+}
+
+type Mutation {
+  createPerson(name: String!, age: Int!): Person!
+}
+
+type Subscription {
+  newPerson: Person!
+}
+
+type Person {
+  name: String!
+  age: Int!
+  posts: [Post!]!
+}
+
+type Post {
+  title: String!
+  author: Person!
+}
+```
 
