@@ -1,0 +1,16 @@
+digraph product {
+  node [shape="circle"];
+  A->B;
+  A->C;
+  A->D
+  B->E;
+  D->F
+  D->G[color=Blue];
+  D->K[color=Blue];
+  G->J[color=Red style=dashed];
+  G->H;
+  G->I[color=Blue];
+  I->K[color=Blue];
+  K->G[color=Red style=dashed];
+  J->A[color=Red style=dashed];
+}
